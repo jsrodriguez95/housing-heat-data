@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Housing & Heat Data</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#f1ece1;
+    --surface:#ffffff;
+    --surface-2:#e9e0cd;
+    --ink:#26221b;
+    --ink-soft:#6b6353;
+    --border:#d9cfb5;
+    --accent:#4f6b63;
+    --accent-ink:#ffffff;
+    --accent-soft:#e2ebe6;
+    --tag-fr-bg:#f4ded0; --tag-fr-ink:#8a4a22;
+    --tag-eu-bg:#dbe6e2; --tag-eu-ink:#2f544a;
+    --tag-gl-bg:#e6e0d0; --tag-gl-ink:#5c5233;
+    --warn-bg:#f6e6cf; --warn-ink:#7a5320; --warn-border:#d9b877;
+    --shadow: 0 1px 2px rgba(38,34,27,0.07), 0 8px 24px -16px rgba(38,34,27,0.4);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17150f;
+      --surface:#201d16;
+      --surface-2:#262218;
+      --ink:#ece6d7;
+      --ink-soft:#b2a892;
+      --border:#3a3526;
+      --accent:#84ac9f;
+      --accent-ink:#0f1512;
+      --accent-soft:#1d2b26;
+      --tag-fr-bg:#3a2416; --tag-fr-ink:#eba876;
+      --tag-eu-bg:#1c2c27; --tag-eu-ink:#9bcabd;
+      --tag-gl-bg:#2a2618; --tag-gl-ink:#cabf99;
+      --warn-bg:#302511; --warn-ink:#e3b466; --warn-border:#5c471f;
+      --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 8px 24px -16px rgba(0,0,0,0.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17150f;
+    --surface:#201d16;
+    --surface-2:#262218;
+    --ink:#ece6d7;
+    --ink-soft:#b2a892;
+    --border:#3a3526;
+    --accent:#84ac9f;
+    --accent-ink:#0f1512;
+    --accent-soft:#1d2b26;
+    --tag-fr-bg:#3a2416; --tag-fr-ink:#eba876;
+    --tag-eu-bg:#1c2c27; --tag-eu-ink:#9bcabd;
+    --tag-gl-bg:#2a2618; --tag-gl-ink:#cabf99;
+    --warn-bg:#302511; --warn-ink:#e3b466; --warn-border:#5c471f;
+    --shadow: 0 1px 2px rgba(0,0,0,0.5), 0 8px 24px -16px rgba(0,0,0,0.8);
+  }
+
+  *{box-sizing:border-box;}
+  body{ background:var(--bg); color:var(--ink); font-family:"Public Sans", ui-sans-serif, system-ui, sans-serif; line-height:1.55; }
+  .wrap{max-width:1040px; margin:0 auto; padding:52px 24px 100px;}
+
+  .eyebrow{ font-family:"IBM Plex Mono", monospace; font-size:12.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--accent); margin:0 0 14px; }
+  h1{ font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:clamp(30px,4.2vw,42px); line-height:1.08; letter-spacing:-0.01em; margin:0 0 16px; text-wrap:balance; max-width:17ch; }
+  .lede{ font-size:16.5px; color:var(--ink-soft); max-width:66ch; margin:0 0 10px; }
+
+  .howto{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px 22px; margin:26px 0 8px; box-shadow:var(--shadow); font-size:14.5px; }
+  .howto b{font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:15px;}
+  .howto ul{margin:10px 0 0; padding-left:20px;}
+  .howto li{margin-bottom:5px;}
+
+  nav.filters{ display:flex; flex-wrap:wrap; gap:8px; margin:30px 0 40px; padding-top:26px; border-top:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:5; padding-bottom:14px; }
+  .filter-pill{ font-family:"IBM Plex Mono", monospace; font-size:12px; color:var(--ink-soft); background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:7px 13px; cursor:pointer; transition:all .15s ease; }
+  .filter-pill:hover{border-color:var(--accent); color:var(--accent);}
+  .filter-pill.active{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+
+  section.topic{margin-top:56px; scroll-margin-top:70px;}
+  section.topic:first-of-type{margin-top:0;}
+  .topic-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:6px;}
+  .topic-num{font-family:"IBM Plex Mono", monospace; font-size:12.5px; color:var(--accent);}
+  h2{ font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:23px; margin:0; letter-spacing:-0.01em; }
+  .topic-note{color:var(--ink-soft); font-size:14.5px; max-width:70ch; margin:8px 0 22px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:15px;}
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:13px; padding:18px 19px 16px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px; }
+  .card-head{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .card-name{font-family:"Fraunces", Georgia, serif; font-weight:600; font-size:16.5px; line-height:1.25;}
+  .card-org{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+  .tag{ font-family:"IBM Plex Mono", monospace; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; padding:4px 8px; border-radius:6px; white-space:nowrap; flex:none; }
+  .tag-fr{background:var(--tag-fr-bg); color:var(--tag-fr-ink);}
+  .tag-eu{background:var(--tag-eu-bg); color:var(--tag-eu-ink);}
+  .tag-gl{background:var(--tag-gl-bg); color:var(--tag-gl-ink);}
+
+  .meta{display:grid; grid-template-columns:auto 1fr; gap:4px 10px; font-size:12px; font-family:"IBM Plex Mono", monospace;}
+  .meta dt{color:var(--ink-soft);}
+  .meta dd{margin:0; color:var(--ink);}
+  .note{font-size:13.3px; color:var(--ink-soft);}
+  .card-link{ margin-top:auto; font-family:"IBM Plex Mono", monospace; font-size:12.3px; color:var(--accent); text-decoration:none; display:inline-flex; align-items:center; gap:5px; padding-top:4px; border-top:1px solid var(--border); }
+  .card-link:hover{text-decoration:underline;}
+  .card-link::after{content:"→";}
+
+  .callout{ background:var(--accent-soft); border:1px solid var(--accent); border-radius:12px; padding:16px 20px; font-size:14px; margin:6px 0 24px; }
+  .callout b{font-weight:700;}
+  .warn{ background:var(--warn-bg); border:1px solid var(--warn-border); color:var(--warn-ink); border-radius:12px; padding:14px 18px; font-size:13.5px; margin:6px 0 24px; }
+
+  footer{ margin-top:76px; padding-top:20px; border-top:1px solid var(--border); font-size:12.5px; color:var(--ink-soft); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  a{color:inherit;}
+  [hidden]{display:none !important;}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <p class="eyebrow">Reference · Data for housing, heat &amp; health research</p>
+  <h1>Housing, heat &amp; health data</h1>
+  <p class="lede">A working repository of datasets spanning housing conditions, urban heat, and population health — anchored in Paris and France, with a closing section for work set elsewhere.</p>
+  <p class="lede">Most entries are point data or regular grids, not administrative boundaries — budget time for a join or interpolation step to get to the commune, IRIS, or neighbourhood level a project needs.</p>
+
+  <div class="howto">
+    <b>How to use this page</b>
+    <ul>
+      <li>Filter by theme below, or scroll — every section stands on its own.</li>
+      <li>France/Paris entries are the deep core; the last section covers other geographies for work set elsewhere.</li>
+      <li>Found a dead link or a better source? Worth updating so this stays current.</li>
+    </ul>
+  </div>
+
+  <nav class="filters" id="filters">
+    <button class="filter-pill active" data-filter="all">All</button>
+    <button class="filter-pill" data-filter="heat">Urban heat</button>
+    <button class="filter-pill" data-filter="air">Air quality</button>
+    <button class="filter-pill" data-filter="green">Green infrastructure</button>
+    <button class="filter-pill" data-filter="housing-energy">Housing &amp; energy poverty</button>
+    <button class="filter-pill" data-filter="aging">Aging &amp; vulnerable populations</button>
+    <button class="filter-pill" data-filter="justice">Environmental justice</button>
+    <button class="filter-pill" data-filter="health">Health outcomes</button>
+    <button class="filter-pill" data-filter="property">Property &amp; markets</button>
+    <button class="filter-pill" data-filter="global">Other geographies</button>
+  </nav>
+
+  <!-- 1. URBAN HEAT -->
+  <section class="topic" id="heat" data-topic="heat">
+    <div class="topic-head"><span class="topic-num">01</span><h2>Urban heat &amp; thermal comfort</h2></div>
+    <p class="topic-note">Heat-island layers built for Paris specifically, plus the wider French heat-monitoring landscape.</p>
+
+    <div class="callout"><b>Useful benchmark:</b> Roofscapes' measured ~17°C indoor temperature decrease from their pilot green-roof structure is a widely cited reference figure for pre/post-greening comparisons — not a downloadable dataset, but worth citing directly.</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Projet MApUCE — heat-island shapefile</div><div class="card-org">CNRM / Météo-France</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>Building block / urban fabric</dd><dt>Access</dt><dd>Free, via project page below</dd></dl>
+        <p class="note">The standard Paris heat-island shapefile for overlay work — this project page has the methodology and download pointers.</p>
+        <a class="card-link" href="https://www.umr-cnrm.fr/ville.climat/spip.php?rubrique120">CNRM project page</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Chaleur sur la ville — interactive map</div><div class="card-org">Institut Paris Region</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>City block, Grand Paris</dd><dt>Access</dt><dd>Free, interactive viewer</dd></dl>
+        <p class="note">Visual cross-check for the MApUCE shapefile across Grand Paris — useful for sanity-checking your own overlay or illustrating findings in a presentation.</p>
+        <a class="card-link" href="https://www.institutparisregion.fr/environnement/changement-climatique/chaleur-sur-la-ville/">Interactive heat map</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">SAFRAN / SIM2 reanalysis</div><div class="card-org">Météo-France</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>~8 km grid, all of France</dd><dt>Coverage</dt><dd>1958–present, daily</dd></dl>
+        <p class="note">Météo-France's own gridded reanalysis — the closest thing to commune-level temperature for a project outside central Paris, and what SDES's degree-day series is built from.</p>
+        <a class="card-link" href="https://recherche.data.gouv.fr/fr/jeu-de-donnee/geopackage-des-mailles-safran-meteo-france-en-france-metropolitaine-integrant-des-variables-administratives-agricoles-et-hydriques">SAFRAN grid GeoPackage</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Données climatologiques de base</div><div class="card-org">Météo-France — Données Publiques</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>~3,500 stations (point)</dd><dt>Frequency</dt><dd>Hourly / daily / monthly</dd></dl>
+        <p class="note">Official ground-station temperature records, free and open — needs geocoding to reach neighbourhood level.</p>
+        <a class="card-link" href="https://donneespubliques.meteofrance.fr/?fond=produit&id_produit=111&id_rubrique=37">Données quotidiennes</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">H3Sensing</div><div class="card-org">Apur research project</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Type</dt><dd>Sensor study, Grand Paris</dd><dt>Access</dt><dd>Free, published findings</dd></dl>
+        <p class="note">Real-world sensing project measuring heatwave health impacts on Grand Paris residents — a strong methodological reference for designing an exposure metric.</p>
+        <a class="card-link" href="https://www.apur.org/en/our-works/h3sensing-research-project-measuring-impact-heatwaves-health-greater-paris-grand-paris-inhabitants">Apur — H3Sensing</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. AIR QUALITY -->
+  <section class="topic" id="air" data-topic="air">
+    <div class="topic-head"><span class="topic-num">02</span><h2>Air quality</h2></div>
+    <p class="topic-note">Heat and air pollution compound each other — relevant for any project looking at multiple exposure alongside thermal comfort.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Geod'air — data consultation</div><div class="card-org">LCSQA — national platform</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>National monitoring network</dd><dt>Access</dt><dd>Free, open API since 2021</dd></dl>
+        <p class="note">The national reference platform for regulatory air-quality data across France — real-time readings plus full station history.</p>
+        <a class="card-link" href="https://www.geodair.fr/donnees/consultation">Geod'air — consultation</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Airparif open data</div><div class="card-org">Île-de-France air monitoring agency</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Paris / Île-de-France network</dd><dt>Access</dt><dd>Free, ArcGIS Hub</dd></dl>
+        <p class="note">Finer-grained regional monitoring and Paris-specific pollution layers than the national platform, hosted on Airparif's own open data hub.</p>
+        <a class="card-link" href="https://data-airparif-asso.opendata.arcgis.com/">Airparif open data hub</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Paris air-quality datasets</div><div class="card-org">Paris Data (opendata.paris.fr)</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Paris monitoring stations</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">NO₂/PM2.5/PM10/O₃ concentrations and threshold-exceedance days, ready to plot alongside a heat layer.</p>
+        <a class="card-link" href="https://opendata.paris.fr/explore/dataset/qualite-de-lair-concentration-moyenne-no2-pm25-pm10-o3-a-partir-de-2015/information/">Concentration dataset</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">CAMS European air quality reanalysis</div><div class="card-org">Copernicus Atmosphere Monitoring Service</div></div><span class="tag tag-eu">EU</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>0.1° grid, hourly</dd><dt>Access</dt><dd>Free, Atmosphere Data Store</dd></dl>
+        <p class="note">Continuous modelled European air-quality fields — the fallback if your case study sits outside a French monitoring network.</p>
+        <a class="card-link" href="https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-reanalyses?tab=download">Atmosphere Data Store</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. GREEN INFRASTRUCTURE -->
+  <section class="topic" id="green" data-topic="green">
+    <div class="topic-head"><span class="topic-num">03</span><h2>Green infrastructure &amp; urban greening</h2></div>
+    <p class="topic-note">The mitigation side of the heat question — tree cover, canopy, and rooftop greening, the layers a pre/post-greening comparison needs.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Les arbres (tree inventory)</div><div class="card-org">Paris Data</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Every public tree, point data</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">Species, height, and location for Paris's public trees — the base layer for any canopy or cooling-potential analysis.</p>
+        <a class="card-link" href="https://opendata.paris.fr/explore/dataset/les-arbres/">Paris Data — Les arbres</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Indice de canopée</div><div class="card-org">Paris Data</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Neighbourhood-level index</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">A ready-made canopy-cover index rather than raw tree points — quicker if you need a summary metric per arrondissement.</p>
+        <a class="card-link" href="https://opendata.paris.fr/explore/dataset/indice-de-canopee/">Paris Data — canopy index</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Hauteur de végétation, Grand Paris</div><div class="card-org">Apur (remote sensing)</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>Raster, ~3,700 km² Grand Paris</dd><dt>Coverage</dt><dd>2021 aerial imagery (IGN)</dd></dl>
+        <p class="note">A vegetation-height raster covering the whole metropolitan area — useful for anything extending past central Paris.</p>
+        <a class="card-link" href="https://opendata.apur.org/datasets/f2d59f0f25154839940da8d6b5c34c3a">Apur open data</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Rooftops &amp; summer comfort studies</div><div class="card-org">Apur</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Type</dt><dd>Published studies, Paris</dd><dt>Access</dt><dd>Free, PDF reports</dd></dl>
+        <p class="note">Apur's own rooftop-greening and summer-comfort case studies — the closest published parallel to a green-roof scenario.</p>
+        <a class="card-link" href="https://www.apur.org/en/our-works/rooftops-paris">Apur — rooftops Paris</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. HOUSING & ENERGY POVERTY -->
+  <section class="topic" id="housing-energy" data-topic="housing-energy">
+    <div class="topic-head"><span class="topic-num">04</span><h2>Housing conditions &amp; energy poverty</h2></div>
+    <p class="topic-note">Building-level energy performance and the population that can't afford to escape indoor heat or cold.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">DPE — diagnostics de performance énergétique</div><div class="card-org">ADEME</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Individual dwelling</dd><dt>Access</dt><dd>Free, bulk download + map viewer</dd></dl>
+        <p class="note">Energy-performance ratings (A–G) for individual dwellings — the standard proxy for indoor thermal comfort at scale.</p>
+        <a class="card-link" href="https://observatoire-dpe-audit.ademe.fr/donnees-dpe-publiques">ADEME DPE observatory</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Tableau de bord &amp; GÉODIP</div><div class="card-org">ONPE — Observatoire National de la Précarité Énergétique</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>National to local, with a geolocation tool</dd><dt>Access</dt><dd>Free</dd></dl>
+        <p class="note">France's reference energy-poverty indicators, plus GÉODIP — a tool for mapping where energy-poor households are concentrated.</p>
+        <a class="card-link" href="https://onpe.org/geolocalisation/geodip">ONPE — GÉODIP</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Inability to keep home adequately warm</div><div class="card-org">Eurostat (ilc_mdes01)</div></div><span class="tag tag-eu">EU</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Country, some NUTS breakdowns</dd><dt>Access</dt><dd>Free, Eurostat database</dd></dl>
+        <p class="note">The standard EU-wide energy-poverty indicator — useful for benchmarking France or comparing to a non-French case study.</p>
+        <a class="card-link" href="https://ec.europa.eu/eurostat/databrowser/view/ilc_mdes01/default/table?lang=en">Eurostat database</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Données logement &amp; urbanisme</div><div class="card-org">SDES / data.gouv.fr</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>National data hub, many datasets</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">SDES's living index of housing-stock and urbanism datasets and reference publications — the reliable entry point since specific editions get superseded.</p>
+        <a class="card-link" href="https://www.data.gouv.fr/fr/pages/donnees_logement-urbanisme/">Logement &amp; urbanisme data hub</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. AGING & VULNERABLE POPULATIONS -->
+  <section class="topic" id="aging" data-topic="aging">
+    <div class="topic-head"><span class="topic-num">05</span><h2>Aging &amp; vulnerable populations</h2></div>
+    <p class="topic-note">Who is actually exposed. Municipal heat-vulnerability registers exist but are legally confidential — these are the open substitutes.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Statistiques locales — age structure</div><div class="card-org">INSEE</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Down to IRIS / commune</dd><dt>Access</dt><dd>Free, interactive</dd></dl>
+        <p class="note">Population by age bracket at fine geography — the base layer for identifying where older or isolated residents are concentrated.</p>
+        <a class="card-link" href="https://statistiques-locales.insee.fr/#c=home">statistiques-locales.insee.fr</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Géodes — mapping platform</div><div class="card-org">Santé publique France</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Region / department, some local</dd><dt>Access</dt><dd>Free, interactive maps</dd></dl>
+        <p class="note">Public-health surveillance indicators including heatwave morbidity/mortality — see the Health outcomes section below for the specific canicule reports.</p>
+        <a class="card-link" href="https://geodes.santepubliquefrance.fr/">Géodes platform</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Registre canicule communal</div><div class="card-org">Municipal, per CNIL</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Individual, nominative</dd><dt>Access</dt><dd class="note" style="font-family:inherit;">Not open data — confidential</dd></dl>
+        <p class="note">Every French commune keeps a nominative register of at-risk residents for heatwave alerts — but it's legally protected, not a research dataset. Cite its existence as institutional context; use INSEE age structure or Santé publique France bulletins for actual analysis.</p>
+        <a class="card-link" href="https://www.cnil.fr/fr/les-registres-communaux-dalerte-et-de-protection-des-populations-en-cas-de-crise-exceptionnelle">CNIL explainer</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. ENVIRONMENTAL JUSTICE -->
+  <section class="topic" id="justice" data-topic="justice">
+    <div class="topic-head"><span class="topic-num">06</span><h2>Environmental justice &amp; socioeconomic geography</h2></div>
+    <p class="topic-note">Whether heat, energy poverty, or pollution track existing inequities — the geography needed to test that.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Filosofi — revenus, pauvreté et niveau de vie</div><div class="card-org">INSEE</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>IRIS (infra-communal)</dd><dt>Coverage</dt><dd>2021, most recent IRIS-level release</dd></dl>
+        <p class="note">Household income and poverty at the finest French administrative geography — the standard socioeconomic layer to overlay against heat or energy-poverty maps.</p>
+        <a class="card-link" href="https://www.insee.fr/fr/statistiques/8229323">INSEE — Filosofi (IRIS)</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Quartiers prioritaires (QPV)</div><div class="card-org">SIG Politique de la Ville</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Priority-neighbourhood boundaries</dd><dt>Access</dt><dd>Free, GIS layers</dd></dl>
+        <p class="note">Official boundaries of France's priority urban-policy neighbourhoods — the standard environmental-justice geography for French cities.</p>
+        <a class="card-link" href="https://sig.ville.gouv.fr/">sig.ville.gouv.fr</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">QPV dataset</div><div class="card-org">data.gouv.fr</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Vector boundaries, nationwide</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">A ready GIS download of QPV boundaries if you'd rather not use the SIG Ville interface directly.</p>
+        <a class="card-link" href="https://www.data.gouv.fr/datasets/quartiers-prioritaires-de-la-politique-de-la-ville-qpv">data.gouv.fr — QPV</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. HEALTH OUTCOMES -->
+  <section class="topic" id="health" data-topic="health">
+    <div class="topic-head"><span class="topic-num">07</span><h2>Health outcomes data</h2></div>
+    <p class="topic-note">The dependent variable, for any project trying to show that housing or heat conditions actually affect health.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Fortes chaleurs et canicule — données</div><div class="card-org">Santé publique France</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>National, seasonal summaries</dd><dt>Coverage</dt><dd>Updated each summer — 2025 bilan latest at writing</dd></dl>
+        <p class="note">Annual heatwave-health impact summaries — deaths, emergency visits, and episode counts. This landing page carries the current bilan rather than one fixed year's PDF.</p>
+        <a class="card-link" href="https://invs.santepubliquefrance.fr/fortes-chaleurs-canicule/donnees">Heatwave-health data</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Odissé — data catalogue</div><div class="card-org">Santé publique France</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Region / department</dd><dt>Access</dt><dd>Free, open data</dd></dl>
+        <p class="note">Broader public-health indicators beyond heat — chronic disease, mortality, and environmental-health metrics for a wider health lens.</p>
+        <a class="card-link" href="https://odisse.santepubliquefrance.fr/explore/">Odissé catalogue</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Protection sanitaire des personnes vulnérables</div><div class="card-org">Cour des comptes</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Type</dt><dd>National audit report</dd><dt>Access</dt><dd>Free, PDF</dd></dl>
+        <p class="note">Not a dataset, but a rigorous 2024 policy audit of how well France protects vulnerable populations' health during climate events — strong for a discussion/limitations section.</p>
+        <a class="card-link" href="https://www.ccomptes.fr/sites/default/files/2024-03/20240312-RPA-2024-ENPA-protection-sante-personnes-vulnerables.pdf">Cour des comptes report</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. PROPERTY & MARKETS -->
+  <section class="topic" id="property" data-topic="property">
+    <div class="topic-head"><span class="topic-num">08</span><h2>Property &amp; housing markets</h2></div>
+    <p class="topic-note">Whether heat vulnerability, energy performance, or greening show up in what people pay.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">DVF — demandes de valeurs foncières</div><div class="card-org">data.gouv.fr</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Transaction-level, nationwide</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">Every recorded property transaction in France with price and address — the base layer for any hedonic or property-values analysis.</p>
+        <a class="card-link" href="https://www.data.gouv.fr/fr/datasets/demandes-de-valeurs-foncieres/">DVF dataset</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Valeurs immobilières, 1800–2020</div><div class="card-org">data.gouv.fr / INSEE</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Long historical series</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">Two centuries of French property-value series — useful if you want historical context for the Haussmannian stock specifically.</p>
+        <a class="card-link" href="https://www.data.gouv.fr/fr/datasets/valeurs-immobilieres-economiques-et-financieres-de-1800-a-2020/">1800–2020 property values</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Niveau des loyers en cartes</div><div class="card-org">Observatoires des loyers</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Paris intra-muros, mapped</dd><dt>Access</dt><dd>Free, interactive</dd></dl>
+        <p class="note">Mapped rent levels across Paris — pairs naturally with a DPE or heat-vulnerability overlay for a rent-burden angle.</p>
+        <a class="card-link" href="https://www.observatoires-des-loyers.org/6/niveau-des-loyers-en-cartes/paris-intra-muros.htm">Rent-level maps</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Communication immobilière mensuelle</div><div class="card-org">Chambre des Notaires de Paris</div></div><span class="tag tag-fr">France</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Quarterly market summaries</dd><dt>Coverage</dt><dd>Q1 2026 shown; issued each quarter</dd></dl>
+        <p class="note">Official quarterly price and volume trends for the Paris region market, including tracking of how DPE ratings affect sale prices. Search "communication immobilière" on the site for the latest quarter.</p>
+        <a class="card-link" href="https://paris.notaires.fr/fr/presse/communication-immobiliere-mensuelle/le-marche-immobilier-francilien-au-1er-trimestre-2026-et-perspectives">Q1 2026 market report</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. OTHER GEOGRAPHIES -->
+  <section class="topic" id="global" data-topic="global">
+    <div class="topic-head"><span class="topic-num">09</span><h2>Other geographies</h2></div>
+    <p class="topic-note">For work set outside Paris — consistent, worldwide-comparable sources for the same themes above.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">ERA5-Land</div><div class="card-org">ECMWF / Copernicus</div></div><span class="tag tag-gl">Global</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>~9 km, hourly</dd><dt>Access</dt><dd>Free, CDS API</dd></dl>
+        <p class="note">2 m air temperature anywhere in the world since 1950 — the default if MApUCE-style local data doesn't exist for a given city.</p>
+        <a class="card-link" href="https://www.ecmwf.int/en/era5-land">ECMWF overview</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">E-OBS</div><div class="card-org">Copernicus C3S / ECA&amp;D</div></div><span class="tag tag-eu">EU</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>0.1° grid, daily</dd><dt>Access</dt><dd>Free, CDS registration</dd></dl>
+        <p class="note">Station-interpolated European temperature — the reference dataset most EU heat studies validate against.</p>
+        <a class="card-link" href="https://cds.climate.copernicus.eu/datasets/insitu-gridded-observations-europe?tab=overview">Climate Data Store</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">MODIS Land Surface Temperature</div><div class="card-org">NASA (Terra/Aqua)</div></div><span class="tag tag-gl">Global</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>1 km, daily</dd><dt>Access</dt><dd>Free, NASA Earthdata</dd></dl>
+        <p class="note">Satellite surface temperature — the go-to for an intra-urban heat-island map anywhere in the world, without a national reanalysis to lean on.</p>
+        <a class="card-link" href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-mod11a1-006">NASA Earthdata catalogue</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">CHELSA</div><div class="card-org">University of Bern / WSL</div></div><span class="tag tag-gl">Global</span></div>
+        <dl class="meta"><dt>Resolution</dt><dd>~1 km climatology</dd><dt>Access</dt><dd>Free, direct download</dd></dl>
+        <p class="note">Terrain-corrected global climate grid — useful for a case study anywhere with meaningful elevation change.</p>
+        <a class="card-link" href="https://www.chelsa-climate.org/">chelsa-climate.org</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">Eurostat cross-cutting indicators</div><div class="card-org">Eurostat</div></div><span class="tag tag-eu">EU</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Country / NUTS2</dd><dt>Access</dt><dd>Free, Eurostat database</dd></dl>
+        <p class="note">One stop for EU-comparable degree-days, house prices, housing-cost overburden, and energy-poverty indicators if your case study is elsewhere in Europe.</p>
+        <a class="card-link" href="https://ec.europa.eu/eurostat/web/housing-price-statistics">Eurostat housing &amp; energy statistics</a>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-name">WHO / OECD wellbeing &amp; health data</div><div class="card-org">WHO Europe, OECD</div></div><span class="tag tag-gl">Global</span></div>
+        <dl class="meta"><dt>Level</dt><dd>Country-level</dd><dt>Access</dt><dd>Free, public portals</dd></dl>
+        <p class="note">Broad international health and wellbeing indicators — a reasonable substitute for Santé publique France's data outside a French case study.</p>
+        <a class="card-link" href="http://www.oecdbetterlifeindex.org/">OECD Better Life Index</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Access terms, coverage windows, and registration requirements change — verify each source before building a pipeline against it.</span>
+    <span>Last updated September 2026.</span>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var pills = document.querySelectorAll('.filter-pill');
+  var sections = document.querySelectorAll('.topic');
+  pills.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      pills.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var f = btn.getAttribute('data-filter');
+      sections.forEach(function(sec){
+        sec.hidden = !(f === 'all' || sec.getAttribute('data-topic') === f);
+      });
+      if (f !== 'all') {
+        var target = document.getElementById(f);
+        if (target) { target.scrollIntoView({behavior:'smooth', block:'start'}); }
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
